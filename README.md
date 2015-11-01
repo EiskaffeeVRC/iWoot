@@ -1,2 +1,2 @@
 # iWoot
-Time to remake iWoot for Dubtrack.fm!
+iWoot is back in business but now for Dubtrack.fm!
