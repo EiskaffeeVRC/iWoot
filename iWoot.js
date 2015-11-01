@@ -20,7 +20,7 @@ IWoot = {
 		Dubtrack.room.chat._messageInputEl.val(String);
 		Dubtrack.room.chat.sendMessage();
 	},
-	chatLog: function(){},
+	chatLog: function(String){Dubtrack.room.chat._messagesEl.append("<li>" + String + "</li>");},
 	isAutoWoot: true,
 	isGUIHidden: true
 };
@@ -115,6 +115,7 @@ function startUp() {
 	connectHTML();
 	loadListeners();
 	autoWootInteval = setInterval(autoWoot, 0);
+	IWoot.chatLog(IWoot.iWoot + " Started!");
 	IWoot.log(IWoot.iWoot + " Started!");
 }
 
