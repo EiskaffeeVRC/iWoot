@@ -15,23 +15,26 @@ var commandBox;
 // Extra things
 var autoWootInteval;
 
-// Main things
-IWoot = {
-	iWoot: NAME + " " + VERSION,
-	log: function(String){console.log(String);},
+API = {
+	chatLog: function(String){Dubtrack.room.chat._messagesEl.append("<li style='font-size: 0.75em'><b>" + String + "</b></li>");}, //MikuPlugin
 	sendChat: function(String){
 		$("#chat-txt-message").val(String);
 		Dubtrack.room.chat.sendMessage();
 	}, // MikuPlugin
-	chatLog: function(String){Dubtrack.room.chat._messagesEl.append("<li style='font-size: 0.75em'><b>" + String + "</b></li>");}, // MikuPlugin
+	setVolume: function(Value){Dubtrack.playerController.setVolume(Value);}
+};
+
+// Main things
+IWoot = {
+	iWoot: NAME + " " + VERSION,
+	log: function(String){console.log(String);},
 	isAutoWoot: true,
 	isNoChatLimit: true,
 	isGUIHidden: true,
 	isCustomTheme: true,
-	setVolume: function(Value){Dubtrack.playerController.setVolume(Value);}
 };
 
-// Just easier for me to use this
+// Just easier for me to use this, plus it reminds me of Java's Color class
 Color = {
 	RED: "#FF0000",
 	ORANGE: "#FF6600",
@@ -53,28 +56,29 @@ function terminateIWoot() {
 	document.getElementById("chat-txt-message").maxLength = 140;
 	commandBox.removeEventListener("keydown", commandListener);
 	iWootGuiButton.remove();
+	clearInterval(autoWootInterval);
 	resetDefaultLook();
-	IWoot.chatLog("iWoot has been terminated! All features are no longer active.");
+	API.chatLog("iWoot has been terminated! All features are no longer active.");
 }
 
 // Whats a plugin without a GUI?
 function loadGUI() {
-		var mainGUIStyle = "#iwoot-gui-main{font-size:0.75em;text-align:center;cursor:pointer;background-color:" + Color.BLACK + ";color:" + Color.CYAN + ";padding:5px;border-radius:10px;border:2px solid gray;}";
-		var autoWootStyle = "#iwoot-autowoot{color:" + Color.GREEN + ";}";
-		var noChatLimitStyle = "#iwoot-chatlimit{color:" + Color.GREEN + "}";
-		var customLookStyle = "#iwoot-customlook{color:" + Color.GREEN + "}";
+	var mainGUIStyle = "#iwoot-gui-main{font-size:0.75em;text-align:center;cursor:pointer;background-color:" + Color.BLACK + ";color:" + Color.CYAN + ";padding:5px;border-radius:5px;border:2px solid gray;}";
+	var autoWootStyle = "#iwoot-autowoot{color:" + Color.GREEN + ";}";
+	var noChatLimitStyle = "#iwoot-chatlimit{color:" + Color.GREEN + "}";
+	var customLookStyle = "#iwoot-customlook{color:" + Color.GREEN + "}";
+	
+	var mainGUIStyles = "<style>" + mainGUIStyle + autoWootStyle + noChatLimitStyle + customLookStyle + "</style>";
 		
-		var mainGUIStyles = "<style>" + mainGUIStyle + autoWootStyle + noChatLimitStyle + customLookStyle + "</style>";
-		
-		$("body").append(mainGUIStyles);
-		
-		$(".main-menu").append('<li><div id="iwoot-gui-main" ><span id="iwoot-gui-options">[iWoot Tools]</span></div></li>');
-		$("#iwoot-gui-main").append('<div id="iwoot-gui"></div>');
-		$("#iwoot-gui").append('<div><span id="iwoot-autowoot" class="iwoot-toggle">AutoWoot</span></div>');
-		$("#iwoot-gui").append('<div><span id="iwoot-chatlimit" class="iwoot-toggle">No Chat Limit</span></div>');
-		$("#iwoot-gui").append('<div><span id="iwoot-customlook" class="iwoot-toggle">iWoot Custom Look</span></div>');
-		$("#iwoot-gui").append('<div><span id="iwoot-terminate" class="iwoot-toggle">Terminate iWoot</span></div>');
-		$("#iwoot-gui").append('<div><input id="iwoot-commandbox" class="iwoot-toggle" placeholder="Command Box (ex: /help)"></div>');
+	$("body").append(mainGUIStyles);
+	
+	$(".main-menu").append('<li><div id="iwoot-gui-main" ><span id="iwoot-gui-options">[iWoot Tools]</span></div></li>');
+	$("#iwoot-gui-main").append('<div id="iwoot-gui"></div>');
+	$("#iwoot-gui").append('<div><span id="iwoot-autowoot" class="iwoot-toggle">AutoWoot</span></div>');
+	$("#iwoot-gui").append('<div><span id="iwoot-chatlimit" class="iwoot-toggle">No Chat Limit</span></div>');
+	$("#iwoot-gui").append('<div><span id="iwoot-customlook" class="iwoot-toggle">iWoot Custom Look</span></div>');
+	$("#iwoot-gui").append('<div><span id="iwoot-terminate" class="iwoot-toggle">Terminate iWoot</span></div>');
+	$("#iwoot-gui").append('<div><input id="iwoot-commandbox" class="iwoot-toggle" placeholder="Command Box (ex: /help)"></div>');
 		
 		$("#iwoot-gui").hide("fast");
 		
@@ -135,21 +139,21 @@ function commandListener(event) {
 	if(keyCode == 13) {
 		if(command.startsWith("/")) {
 			if(command === "/help") {
-				IWoot.chatLog(IWoot.iWoot + " Commands:");
-				IWoot.chatLog("* /help - Displays this message");
-				IWoot.chatLog("* /volume {Value} - Sets the volume to {Value} (0-100)");
-				IWoot.chatLog("* /emojis - Links to a website that has available Emojis to use");
+				API.chatLog(IWoot.iWoot + " Commands:");
+				API.chatLog("* /help - Displays this message");
+				API.chatLog("* /volume {Value} - Sets the volume to {Value} (0-100)");
+				API.chatLog("* /emojis - Links to a website that has available Emojis to use");
 			}
 			if(command.startsWith("/volume")) {
 				var VOLUME = command.replace(" ", "").substring(7);
-				Dubtrack.playerController.setVolume(parseInt(command.substring(8)));
-				IWoot.chatLog("Volume set to: " + parseInt(command.substring(8)));
+				API.setVolume(parseInt(command.substring(8)));
+				API.chatLog("Volume set to: " + parseInt(command.substring(8)));
 			}
 			if(command === "/emojis") {
-				IWoot.chatLog("<a href='http://www.emoji-cheat-sheet.com/' target='_blank'>- Emoji Cheat Sheet -</a>");
+				API.chatLog("Emoji Cheat Sheet - <a href='http://www.emoji-cheat-sheet.com/' target='_blank'>(Click me)</a>");
 			}
 		}
-		$("iwoot-commandbox").val("");
+		$("#iwoot-commandbox").val("");
 		document.getElementsByClassName("chat-main")[0].scrollIntoView(false);
 	}
 }
@@ -161,15 +165,25 @@ function autoWoot() {
 }
 
 function setCustomLook() {
-	document.getElementById("chat").style.border = "5px solid black";
+	// Chat box
+	document.getElementById("chat").style.border = "2px solid black";
 	document.getElementById("chat").style.borderRadius = "5px";
 	document.getElementById("chat").style.opacity = "0.8";
+	
+	// Bottom bar
+	document.getElementById("player-controller").style.border = "2px solid black";
+	document.getElementById("player-controller").style.opacity = "0.8";
 }
 
 function resetDefaultLook() {
+	// Chat
 	document.getElementById("chat").style.border = "0px solid black";
 	document.getElementById("chat").style.borderRadius = "0px";
 	document.getElementById("chat").style.opacity = "1.0";
+	
+	// Bottom bar
+	document.getElementById("player-controller").style.border = "0px solid black";
+	document.getElementById("player-controller").style.opacity = "1.0";
 }
 
 function toggleTheme() {
@@ -203,11 +217,11 @@ function startUp() {
 	connectHTML();
 	loadListeners();
 	setCustomLook();
-	autoWootInteval = setInterval(autoWoot, 0);
+	autoWootInteval = setInterval(autoWoot, 100);
 	document.getElementById("chat-txt-message").maxLength = 99999999999999999999;
 	commandBox.addEventListener("keydown", commandListener);
-	IWoot.chatLog(IWoot.iWoot + " Started!");
-	IWoot.chatLog("TIP: iWoot disables the chat limit of 140 characters! (Togglable)");
+	API.chatLog(IWoot.iWoot + " Started!");
+	API.chatLog("TIP: iWoot disables the chat limit of 140 characters! (Togglable)");
 	document.getElementsByClassName("chat-main")[0].scrollIntoView(false);
 	IWoot.log(IWoot.iWoot + " Started!");
 }
