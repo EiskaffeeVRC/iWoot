@@ -16,7 +16,7 @@ var commandBox;
 var autoWootInteval;
 
 API = {
-	chatLog: function(String){Dubtrack.room.chat._messagesEl.append("<li style='font-size: 0.75em'><b>" + String + "</b></li>");}, //MikuPlugin
+	chatLog: function(String){Dubtrack.room.chat._messagesEl.append("<li id='chatlog'><b>" + String + "<b></li>");}, //MikuPlugin
 	sendChat: function(String){
 		$("#chat-txt-message").val(String);
 		Dubtrack.room.chat.sendMessage();
@@ -67,8 +67,9 @@ function loadGUI() {
 	var autoWootStyle = "#iwoot-autowoot{color:" + Color.GREEN + ";}";
 	var noChatLimitStyle = "#iwoot-chatlimit{color:" + Color.GREEN + "}";
 	var customLookStyle = "#iwoot-customlook{color:" + Color.GREEN + "}";
+	var chatLogStyle = "#chatlog{font-size:0.75em;}";
 	
-	var mainGUIStyles = "<style>" + mainGUIStyle + autoWootStyle + noChatLimitStyle + customLookStyle + "</style>";
+	var mainGUIStyles = "<style>" + mainGUIStyle + autoWootStyle + noChatLimitStyle + customLookStyle + chatLogStyle + "</style>";
 		
 	$("body").append(mainGUIStyles);
 	
