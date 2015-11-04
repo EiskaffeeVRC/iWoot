@@ -13,7 +13,8 @@ var terminateButton;
 var commandBox;
 
 // Extra things
-var autoWootInteval;
+var autoWootInterval;
+var customEmoteInterval;
 
 API = {
 	chatLog: function(String){Dubtrack.room.chat._messagesEl.append("<li id='chatlog'><b>" + String + "<b></li>");}, //MikuPlugin
@@ -44,7 +45,8 @@ Color = {
 	PURPLE: "#FF00FF",
 	BLACK: "#000000",
 	WHITE: "#FFFFFF",
-	CYAN: "#00FFFF"
+	CYAN: "#00FFFF",
+	GREEN_YELLOW: "#99CC00"
 };
 
 // The 'kill' switch
@@ -57,24 +59,26 @@ function terminateIWoot() {
 	commandBox.removeEventListener("keydown", commandListener);
 	iWootGuiButton.remove();
 	clearInterval(autoWootInterval);
+	clearInterval(customEmoteInterval);
 	resetDefaultLook();
 	API.chatLog("iWoot has been terminated! All features are no longer active.");
 }
 
 // Whats a plugin without a GUI?
 function loadGUI() {
-	var mainGUIStyle = "#iwoot-gui-main{font-size:0.75em;text-align:center;cursor:pointer;background-color:" + Color.BLACK + ";color:" + Color.CYAN + ";padding:5px;border-radius:5px;border:2px solid gray;}";
+	var mainGUIStyle = "#iwoot-gui-main{z-index:99999;display:none;position:fixed;width:300px;height:100%;font-size:0.75em;text-align:center;cursor:pointer;background-color:" + Color.BLACK + ";color:" + Color.CYAN + ";padding:0.5em;border-radius:5px;border:1px solid gray;}";
 	var autoWootStyle = "#iwoot-autowoot{color:" + Color.GREEN + ";}";
 	var noChatLimitStyle = "#iwoot-chatlimit{color:" + Color.GREEN + "}";
 	var customLookStyle = "#iwoot-customlook{color:" + Color.GREEN + "}";
-	var chatLogStyle = "#chatlog{font-size:0.75em;}";
+	var chatLogStyle = "#chatlog{font-size:0.75em;color:" + Color.GREEN_YELLOW + "}";
 	
 	var mainGUIStyles = "<style>" + mainGUIStyle + autoWootStyle + noChatLimitStyle + customLookStyle + chatLogStyle + "</style>";
 		
 	$("body").append(mainGUIStyles);
 	
-	$(".main-menu").append('<li><div id="iwoot-gui-main" ><span id="iwoot-gui-options">[iWoot Tools]</span></div></li>');
-	$("#iwoot-gui-main").append('<div id="iwoot-gui"></div>');
+	$(".header-left-navigation").append('<span id="iwoot-gui-options" class="room-name navigation active-room-link">iWoot</span>');
+	$('<div id="iwoot-gui-main"></div>').insertBefore($("#main-section"));
+	$("#iwoot-gui-main").append('<div><span id="iwoot-gui"></span></div>');
 	$("#iwoot-gui").append('<div><span id="iwoot-autowoot" class="iwoot-toggle">AutoWoot</span></div>');
 	$("#iwoot-gui").append('<div><span id="iwoot-chatlimit" class="iwoot-toggle">No Chat Limit</span></div>');
 	$("#iwoot-gui").append('<div><span id="iwoot-customlook" class="iwoot-toggle">iWoot Custom Look</span></div>');
@@ -90,9 +94,11 @@ function loadGUI() {
 function loadListeners() {
 	$("#iwoot-gui-options").click(function() {
 		if(!IWoot.isGUIHidden == false) {
+			document.getElementById("iwoot-gui-main").style.display = "block";
 			$("#iwoot-gui").show(500);
 			IWoot.isGUIHidden = false;
 		} else {
+			document.getElementById("iwoot-gui-main").style.display = "none";
 			$("#iwoot-gui").hide("slow");
 			IWoot.isGUIHidden = true;	
 		}
@@ -132,6 +138,10 @@ function loadListeners() {
 	IWoot.log("GUI Listeners Loaded!");
 }
 
+function checkForEmotes() {
+	// https://i.imgur.com/U8PrnfU.gif :hug:
+}
+
 function commandListener(event) {
 	keyCode = event.keyCode;
 	
@@ -166,22 +176,12 @@ function autoWoot() {
 }
 
 function setCustomLook() {
-	// Chat box
-	document.getElementById("chat").style.border = "2px solid black";
-	document.getElementById("chat").style.borderRadius = "5px";
-	document.getElementById("chat").style.opacity = "0.8";
-	
 	// Bottom bar
 	document.getElementById("player-controller").style.border = "2px solid black";
-	document.getElementById("player-controller").style.opacity = "0.8";
+	document.getElementById("player-controller").style.opacity = "0.5";
 }
 
 function resetDefaultLook() {
-	// Chat
-	document.getElementById("chat").style.border = "0px solid black";
-	document.getElementById("chat").style.borderRadius = "0px";
-	document.getElementById("chat").style.opacity = "1.0";
-	
 	// Bottom bar
 	document.getElementById("player-controller").style.border = "0px solid black";
 	document.getElementById("player-controller").style.opacity = "1.0";
@@ -218,7 +218,8 @@ function startUp() {
 	connectHTML();
 	loadListeners();
 	setCustomLook();
-	autoWootInteval = setInterval(autoWoot, 100);
+	autoWootInterval = setInterval(autoWoot, 100);
+	customEmoteInterval = setInterval(checkForEmotes, 100);
 	document.getElementById("chat-txt-message").maxLength = 99999999999999999999;
 	commandBox.addEventListener("keydown", commandListener);
 	API.chatLog(IWoot.iWoot + " Started!");
