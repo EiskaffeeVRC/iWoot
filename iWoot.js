@@ -150,18 +150,25 @@ function commandListener(event) {
 	if(keyCode == 13) {
 		if(command.startsWith("/")) {
 			if(command === "/help") {
-				API.chatLog(IWoot.iWoot + " Commands:");
+				API.chatLog(IWoot.iWoot + " Commands (Each shows confirmation with the 'mention' sound):");
 				API.chatLog("* /help - Displays this message");
 				API.chatLog("* /volume {Value} - Sets the volume to {Value} (0-100)");
 				API.chatLog("* /emojis - Links to a website that has available Emojis to use");
+				API.chatLog("* /share - Shares a link to get iWoot");
+				Dubtrack.room.chat.chatSound.play();
 			}
 			if(command.startsWith("/volume")) {
 				var VOLUME = command.replace(" ", "").substring(7);
 				API.setVolume(parseInt(command.substring(8)));
 				API.chatLog("Volume set to: " + parseInt(command.substring(8)));
+				Dubtrack.room.chat.chatSound.play();
 			}
 			if(command === "/emojis") {
 				API.chatLog("Emoji Cheat Sheet - <a href='http://www.emoji-cheat-sheet.com/' target='_blank'>(Click me)</a>");
+				Dubtrack.room.chat.chatSound.play();
+			}
+			if(command === "/share") {
+				API.sendChat("Get iWoot here! http://xxskhxx.comoj.com/tools.php");
 			}
 		}
 		$("#iwoot-commandbox").val("");
