@@ -7,14 +7,14 @@ var wootButton;
 var mehButton;
 var iWootButton;
 var iWootGui;
-var autoWootButton;
+var autoDubUpButton;
 var noChatLimitButton;
 var customLookButton;
 var terminateButton;
 var commandBox;
 
 // Extra things
-var autoWootInterval;
+var autoDubUpInterval;
 var customEmoteInterval;
 
 API = {
@@ -23,7 +23,11 @@ API = {
 		$("#chat-txt-message").val(String);
 		Dubtrack.room.chat.sendMessage();
 	}, // MikuPlugin
-	setVolume: function(Value){Dubtrack.playerController.setVolume(Value);}
+	setVolume: function(Value){Dubtrack.playerController.setVolume(Value);},
+	CHAT: "realtime:chat-message",
+	ADVANCE: "realtime:room_playlist-update",
+	on: function(Event, Function){Dubtrack.Events.bind(Event, Function);},
+	off: function(Event, Function){Dubtrack.Events.unbind(Event, Function);}
 };
 
 // Main things
@@ -60,7 +64,7 @@ function terminateIWoot() {
 	commandBox.removeEventListener("keydown", commandListener);
 	iWootButton.remove();
 	iWootGui.remove();
-	clearInterval(autoWootInterval);
+	clearInterval(autoDubUpInterval);
 	clearInterval(customEmoteInterval);
 	resetDefaultLook();
 	window.alert("iWoot and *ALL* features have been removed/deactivated!");
@@ -69,20 +73,20 @@ function terminateIWoot() {
 // Whats a plugin without a GUI?
 function loadGUI() {
 	var mainGUIStyle = "#iwoot-gui-main{opacity:0.8;z-index:99999;display:none;position:fixed;width:300px;height:100%;text-align:left;cursor:pointer;background-color:" + Color.BLACK + ";color:" + Color.CYAN + ";padding:0.5em;border-radius:5px;border:1px solid gray;}";
-	var autoWootStyle = "#iwoot-autowoot{color:" + Color.GREEN + ";}";
+	var autoDubUpStyle = "#iwoot-autodubup{color:" + Color.GREEN + ";}";
 	var noChatLimitStyle = "#iwoot-chatlimit{color:" + Color.GREEN + ";}";
 	var customLookStyle = "#iwoot-customlook{color:" + Color.GREEN + ";}";
 	var commandBoxStyle = "#iwoot-commandbox{color:" + Color.GREEN + ";border:1px solid" + Color.GREEM + "}";
 	var chatLogStyle = "#chatlog{font-size:0.75em;color:" + Color.GREEN_YELLOW + "}";
 	
-	var mainGUIStyles = "<style>" + mainGUIStyle + autoWootStyle + noChatLimitStyle + customLookStyle + commandBoxStyle + chatLogStyle + "</style>";
+	var mainGUIStyles = "<style>" + mainGUIStyle + autoDubUpStyle + noChatLimitStyle + customLookStyle + commandBoxStyle + chatLogStyle + "</style>";
 		
 	$("body").append(mainGUIStyles);
 	
 	$(".header-left-navigation").append('<a class="navigate room-active-link active-room" id="main-room-active-link"><span class="icon-chevron"></span><span class="room-name" id="iwoot-gui-options">iWoot</span></a>');
 	$('<div id="iwoot-gui-main"></div>').insertBefore($("#main-section"));
 	$("#iwoot-gui-main").append('<div style="font-size:0.75em;opacity:1.0;"><span id="iwoot-gui"></span></div>');
-	$("#iwoot-gui").append('<div><span id="iwoot-autowoot" class="iwoot-toggle">AutoWoot</span></div>');
+	$("#iwoot-gui").append('<div><span id="iwoot-autodubup" class="iwoot-toggle">AutoDupUp</span></div>');
 	$("#iwoot-gui").append('<div><span id="iwoot-chatlimit" class="iwoot-toggle">No Chat Limit</span></div>');
 	$("#iwoot-gui").append('<div><span id="iwoot-customlook" class="iwoot-toggle">iWoot Custom Look</span></div>');
 	$("#iwoot-gui").append('<div><span id="iwoot-terminate" class="iwoot-toggle">Terminate iWoot</span></div>');
@@ -111,14 +115,14 @@ function loadListeners() {
 		}
 	});
 		
-	$("#iwoot-autowoot").click(function() {
+	$("#iwoot-autodubup").click(function() {
 		if(!IWoot.isAutoWoot == true) {
 			IWoot.isAutoWoot = true;
-			autoWootButton.style.color = Color.GREEN;
-			autoWoot();
+			autoDubUpButton.style.color = Color.GREEN;
+			autoDubUp();
 		} else {
 			IWoot.isAutoWoot = false;
-			autoWootButton.style.color = Color.RED;
+			autoDubUpButton.style.color = Color.RED;
 		}
 	});
 	
@@ -175,7 +179,7 @@ function commandListener(event) {
 	}
 }
 
-function autoWoot() {
+function autoDubUp() {
 	if(IWoot.isAutoWoot) {
 		wootButton.click();
 	}
@@ -211,7 +215,7 @@ function connectHTML() {
 	mehButton = $(".icon-arrow-down");
 	iWootButton = document.getElementById("iwoot-gui-options");
 	iWootGui = document.getElementById("iwoot-gui-main");
-	autoWootButton = document.getElementById("iwoot-autowoot");
+	autoDubUpButton = document.getElementById("iwoot-autodubup");
 	noChatLimitButton = document.getElementById("iwoot-chatlimit");
 	customLookButton = document.getElementById("iwoot-customlook");
 	terminateButton = document.getElementById("iwoot-terminate");
@@ -225,8 +229,9 @@ function startUp() {
 	connectHTML();
 	loadListeners();
 	setCustomLook();
-	autoWootInterval = setInterval(autoWoot, 100);
+	autoDubUpInterval = setInterval(autoDubUp, 100);
 	customEmoteInterval = setInterval(checkForEmotes, 100);
+	API.on(API.CHAT, function(){console.log("lol wtf");});
 	document.getElementById("chat-txt-message").maxLength = 99999999999999999999;
 	commandBox.addEventListener("keydown", commandListener);
 	API.chatLog(IWoot.iWoot + " Started!");
