@@ -13,10 +13,6 @@ var customLookButton;
 var terminateButton;
 var commandBox;
 
-// Extra things
-var autoDubUpInterval;
-var customEmoteInterval;
-
 API = {
 	chatLog: function(String){Dubtrack.room.chat._messagesEl.append("<li id='chatlog'><b>" + String + "<b></li>");}, //MikuPlugin
 	sendChat: function(String){
@@ -64,8 +60,7 @@ function terminateIWoot() {
 	commandBox.removeEventListener("keydown", commandListener);
 	iWootButton.remove();
 	iWootGui.remove();
-	clearInterval(autoDubUpInterval);
-	clearInterval(customEmoteInterval);
+	disconnectAPI();
 	resetDefaultLook();
 	window.alert("iWoot and *ALL* features have been removed/deactivated!");
 }
@@ -223,15 +218,29 @@ function connectHTML() {
 	IWoot.log("HTML Variables connected to their HTML parts!");
 }
 
+// Might as well do something with it
+function connectAPI() {
+	API.on(API.CHAT, checkForEmotes);
+	API.on(API.ADVANCE, autoDubUp);
+	
+	IWoot.log("API Connected!");
+}
+
+// I need this for the terminate
+function disconnectAPI() {
+	API.off(API.CHAT, checkForEmotes);
+	API.off(API.ADVANCE, autoDubUp);
+	
+	IWoot.log("API Disconnected!");
+}
+
 // Its useless without this...
 function startUp() {
 	loadGUI();
 	connectHTML();
+	connectAPI();
 	loadListeners();
 	setCustomLook();
-	autoDubUpInterval = setInterval(autoDubUp, 100);
-	customEmoteInterval = setInterval(checkForEmotes, 100);
-	API.on(API.CHAT, function(){console.log("lol wtf");});
 	document.getElementById("chat-txt-message").maxLength = 99999999999999999999;
 	commandBox.addEventListener("keydown", commandListener);
 	API.chatLog(IWoot.iWoot + " Started!");
