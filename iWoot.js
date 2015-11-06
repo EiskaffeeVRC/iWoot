@@ -9,7 +9,6 @@ var iWootButton;
 var iWootGui;
 var autoDubUpButton;
 var noChatLimitButton;
-var customLookButton;
 var terminateButton;
 var commandBox;
 
@@ -33,7 +32,6 @@ IWoot = {
 	isAutoWoot: true,
 	isNoChatLimit: true,
 	isGUIHidden: true,
-	isCustomTheme: true,
 };
 
 // Just easier for me to use this, plus it reminds me of Java's Color class
@@ -61,7 +59,6 @@ function terminateIWoot() {
 	iWootButton.remove();
 	iWootGui.remove();
 	disconnectAPI();
-	resetDefaultLook();
 	window.alert("iWoot and *ALL* features have been removed/deactivated!");
 }
 
@@ -70,11 +67,10 @@ function loadGUI() {
 	var mainGUIStyle = "#iwoot-gui-main{opacity:0.8;z-index:99999;display:none;position:fixed;width:300px;height:100%;text-align:left;cursor:pointer;background-color:" + Color.BLACK + ";color:" + Color.CYAN + ";padding:0.5em;border-radius:5px;border:1px solid gray;}";
 	var autoDubUpStyle = "#iwoot-autodubup{color:" + Color.GREEN + ";}";
 	var noChatLimitStyle = "#iwoot-chatlimit{color:" + Color.GREEN + ";}";
-	var customLookStyle = "#iwoot-customlook{color:" + Color.GREEN + ";}";
 	var commandBoxStyle = "#iwoot-commandbox{color:" + Color.GREEN + ";border:1px solid" + Color.GREEM + "}";
 	var chatLogStyle = "#chatlog{font-size:0.75em;color:" + Color.GREEN_YELLOW + "}";
 	
-	var mainGUIStyles = "<style>" + mainGUIStyle + autoDubUpStyle + noChatLimitStyle + customLookStyle + commandBoxStyle + chatLogStyle + "</style>";
+	var mainGUIStyles = "<style>" + mainGUIStyle + autoDubUpStyle + noChatLimitStyle + commandBoxStyle + chatLogStyle + "</style>";
 		
 	$("body").append(mainGUIStyles);
 	
@@ -83,7 +79,6 @@ function loadGUI() {
 	$("#iwoot-gui-main").append('<div style="font-size:0.75em;opacity:1.0;"><span id="iwoot-gui"></span></div>');
 	$("#iwoot-gui").append('<div><span id="iwoot-autodubup" class="iwoot-toggle">AutoDupUp</span></div>');
 	$("#iwoot-gui").append('<div><span id="iwoot-chatlimit" class="iwoot-toggle">No Chat Limit</span></div>');
-	$("#iwoot-gui").append('<div><span id="iwoot-customlook" class="iwoot-toggle">iWoot Custom Look</span></div>');
 	$("#iwoot-gui").append('<div><span id="iwoot-terminate" class="iwoot-toggle">Terminate iWoot</span></div>');
 	$("#iwoot-gui").append('<div><input id="iwoot-commandbox" class="iwoot-toggle" placeholder="Command Box (ex: /help)"></div>');
 	$("#iwoot-gui").append('<div><b>iWoot v1.0.0 User Commands:</b></div>');
@@ -133,10 +128,6 @@ function loadListeners() {
 		}
 	});
 	
-	$("#iwoot-customlook").click(function() {
-		toggleTheme();
-	});
-	
 	$("#iwoot-terminate").click(function() {
 		terminateIWoot();
 	});
@@ -180,30 +171,6 @@ function autoDubUp() {
 	}
 }
 
-function setCustomLook() {
-	// Bottom bar
-	document.getElementById("player-controller").style.border = "2px solid black";
-	document.getElementById("player-controller").style.opacity = "0.5";
-}
-
-function resetDefaultLook() {
-	// Bottom bar
-	document.getElementById("player-controller").style.border = "0px solid black";
-	document.getElementById("player-controller").style.opacity = "1.0";
-}
-
-function toggleTheme() {
-	if(!IWoot.isCustomTheme) {
-		setCustomLook();
-		customLookButton.style.color = Color.GREEN;
-		IWoot.isCustomTheme = true;
-	} else {
-		resetDefaultLook();
-		customLookButton.style.color = Color.RED;
-		IWoot.isCustomTheme = false;
-	}
-}
-
 // Its just easier for me sometimes...
 function connectHTML() {
 	wootButton = $(".icon-arrow-up");
@@ -212,7 +179,6 @@ function connectHTML() {
 	iWootGui = document.getElementById("iwoot-gui-main");
 	autoDubUpButton = document.getElementById("iwoot-autodubup");
 	noChatLimitButton = document.getElementById("iwoot-chatlimit");
-	customLookButton = document.getElementById("iwoot-customlook");
 	terminateButton = document.getElementById("iwoot-terminate");
 	commandBox = document.getElementById("iwoot-commandbox");
 	IWoot.log("HTML Variables connected to their HTML parts!");
@@ -240,7 +206,6 @@ function startUp() {
 	connectHTML();
 	connectAPI();
 	loadListeners();
-	setCustomLook();
 	document.getElementById("chat-txt-message").maxLength = 99999999999999999999;
 	commandBox.addEventListener("keydown", commandListener);
 	API.chatLog(IWoot.iWoot + " Started!");
