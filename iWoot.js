@@ -9,7 +9,6 @@ var iWootButton;
 var iWootGui;
 var autoDubUpButton;
 var noChatLimitButton;
-var commandBox;
 
 String.prototype.replaceAll = function(token, newToken) {
 	var str = this;
@@ -56,7 +55,7 @@ IWoot = {
 			var users = "";
 			for(var i = 0; i < $(".username").length; i++) {
 				if(!users.includes($(".username")[i].innerHTML) && $(".username")[i].innerHTML != undefined) {
-					users += "<li>@" + $(".username")[i].innerHTML + " </li>";
+					users += '<li>@' + $(".username")[i].innerHTML + ' </li>';
 				}
 			}
 			return users;
@@ -85,29 +84,24 @@ Color = {
 
 // Whats a plugin without a GUI?
 function loadGUI() {
-	var mainGUIStyle = "#iwoot-gui-main{opacity:0.8;z-index:99999;display:none;position:fixed;width:300px;height:100%;text-align:left;background-color:" + Color.DARK_PURPLE + ";color:" + Color.CYAN + ";padding:0.5em;border-radius:5px;border:1px solid gray;}";
+	var mainGUIStyle = "#iwoot-gui-main{opacity:0.8;z-index:99999;display:none;position:fixed;width:300px;height:100%;text-align:center;background-color:" + Color.DARK_PURPLE + ";color:" + Color.CYAN + ";border:1px solid gray;}";
 	var autoDubUpStyle = "#iwoot-autodubup{color:" + Color.GREEN + ";}";
 	var noChatLimitStyle = "#iwoot-chatlimit{color:" + Color.GREEN + ";}";
-	var commandBoxStyle = "#iwoot-commandbox{color:" + Color.GREEN + ";border:1px solid" + Color.GREEN + ";background:" + Color.BLACK + "}";
-	var chatLogStyle = "#chatlog{font-size:0.75em;color:" + Color.GREEN_YELLOW + "}";
-	var iWootToggleStyle = ".iwoot-toggle{cursor:pointer;font-weight:bold;}";
+	var chatLogStyle = "#chatlog{font-size:0.75em;color:" + Color.GREEN_YELLOW + ";padding:0px;}";
+	var iWootToggleStyle = ".iwoot-toggle{cursor:pointer;font-weight:bold;font-size:15px;}";
 	
-	var mainGUIStyles = "<style>" + mainGUIStyle + autoDubUpStyle + noChatLimitStyle + commandBoxStyle + chatLogStyle + iWootToggleStyle + "</style>";
+	var mainGUIStyles = "<style>" + mainGUIStyle + autoDubUpStyle + noChatLimitStyle + chatLogStyle + iWootToggleStyle + "</style>";
 		
 	$("body").append(mainGUIStyles);
 	
 	$(".header-left-navigation").append('<a class="navigate room-active-link active-room" id="main-room-active-link"><span class="icon-chevron"></span><span class="room-name" id="iwoot-gui-options">iWoot</span></a>');
 	$('<div id="iwoot-gui-main"></div>').insertBefore($("#main-section"));
 	$("#iwoot-gui-main").append('<div style="font-size:0.75em;opacity:1.0;"><span id="iwoot-gui"></span></div>');
+	$("#iwoot-gui").append("<hr></hr><h1><b>iWoot</b></h1><hr></hr>");
 	$("#iwoot-gui").append('<div><span id="iwoot-autodubup" class="iwoot-toggle">AutoDupUp</span></div>');
 	$("#iwoot-gui").append('<div><span id="iwoot-chatlimit" class="iwoot-toggle">No Chat Limit</span></div>');
-	$("#iwoot-gui").append('<div><input id="iwoot-commandbox" class="iwoot-toggle" placeholder="Command Box (ex: /help)"></div>');
-	$("#iwoot-gui").append('<div><b>iWoot v1.0.0 User Commands:</b></div>');
-	$("#iwoot-gui").append('<div><b>/volume {VALUE} - Sets the volume to {VALUE} (0-100)</b></div>');
-	$("#iwoot-gui").append('<div><b>/emojis - Sends a link to an "Emoji" list</b></div>');
-	$("#iwoot-gui").append('<div><b>/share - Shares a link in chat to iWoot! <3</b></div>');
 	
-	$('<div id="iwoot-chat-extra" style="display:none;overflow:auto;height:125px;"></div>').insertBefore($("#new-messages-counter"));
+	$('<div id="iwoot-chat-extra" style="display:none;overflow:auto;height:100px;"></div>').insertBefore($("#new-messages-counter"));
 	
 
 		
@@ -174,25 +168,29 @@ function checkForEmotes() {
 function commandListener(event) {
 	keyCode = event.keyCode;
 	
-	command = commandBox.value;
+	message = $("#chat-txt-message").val();
 	
 	if(keyCode == 13) {
-		if(command.startsWith("/")) {
-			if(command.startsWith("/volume")) {
-				var VOLUME = command.replace(" ", "").substring(7);
-				API.setVolume(parseInt(command.substring(8)));
+		event.stopImmediatePropagation();
+		
+		if(message.startsWith("/")) {
+			if(message.startsWith("/volume")) {
+				var VOLUME = parseInt(message.replace(" ", "").substring(7));
+				API.setVolume(VOLUME);
 				Dubtrack.room.chat.chatSound.play();
 			}
-			if(command === "/emojis") {
-				API.chatLog("Emoji Cheat Sheet - <a href='http://www.emoji-cheat-sheet.com/' target='_blank'>(Click me)</a>");
+			if(message  === "/emojis") {
+				window.open("http://emoji-cheat-sheet.com", "_blank");
 				Dubtrack.room.chat.chatSound.play();
 			}
-			if(command === "/share") {
+			if(message === "/share") {
 				API.sendChat("Get iWoot here! http://xxskhxx.comoj.com/tools.php");
 				Dubtrack.room.chat.chatSound.play();
 			}
+			$("#chat-txt-message").val("");
+		} else {
+			API.sendChat(message);
 		}
-		$("#iwoot-commandbox").val("");
 	}
 }
 
@@ -210,7 +208,6 @@ function connectHTML() {
 	iWootGui = document.getElementById("iwoot-gui-main");
 	autoDubUpButton = document.getElementById("iwoot-autodubup");
 	noChatLimitButton = document.getElementById("iwoot-chatlimit");
-	commandBox = document.getElementById("iwoot-commandbox");
 	IWoot.Tools.log("HTML Variables connected to their HTML parts!");
 }
 
@@ -222,27 +219,42 @@ function connectAPI() {
 	IWoot.Tools.log("API Connected!");
 }
 
-function textHandler() {
+function textHandler(event) {
 	var text = $("#chat-txt-message").val();
 	
-	if(text.includes("@") || text.includes(":")) {
+	if(text.includes("@") || text.includes(":") || text.startsWith("/")) {
 		$("#iwoot-chat-extra").show(250);
 		if(text.includes("@")) {
 			if($("#iwoot-chat-extra").html() != IWoot.Tools.getUsers()) {
 				$("#iwoot-chat-extra").html(IWoot.Tools.getUsers());
+				$("#chat-txt-message").css("border", "0px");
 			}
 		}
 		if(text.includes(":")) {
-			var emotes = '<li>:hug: <img class="emoji" src="https://i.imgur.com/U8PrnfU.gif"></img></li>\n';
-			emotes += "<li>:lennyface: ( ͡° ͜ʖ ͡°)</li>\n";
+			var emotes = "";
+			emotes += '<li>:hug: <img class="emoji" src="https://i.imgur.com/U8PrnfU.gif"></img></li>';
+			emotes += '<li>:lennyface: ( ͡° ͜ʖ ͡°)</li>';
 			emotes += '<li>:fangirling: <img class="emoji" src="https://i.imgur.com/L5eZObb.gif"></img></li>';
 			
 			if($("#iwoot-chat-extra").html() != emotes) {
 				$("#iwoot-chat-extra").html(emotes);
+				$("#chat-txt-message").css("border", "0px");
+			}
+		}
+		if(text.startsWith("/")) {
+			var userCmds = "";
+			userCmds += '<li>/volume {Value} - Sets the volume to {Value} (0-100)</li>';
+			userCmds += '<li>/share - Sends everyone in the room a link to iWoot! <3</li>';
+			userCmds += '<li>/emojis - Sends you to an "Emoji Cheat Sheet"</li>';
+			
+			if($("#iwoot-chat-extra").html() != userCmds) {
+				$("#iwoot-chat-extra").html(userCmds);
+				$("#chat-txt-message").css("border", "1px solid " + Color.GREEN);
 			}
 		}
 	} else {
 		$("#iwoot-chat-extra").hide("fast");
+		$("#chat-txt-message").css("border", "0px");
 	}
 }
 
@@ -253,8 +265,8 @@ function startUp() {
 	connectAPI();
 	loadListeners();
 	document.getElementById("chat-txt-message").maxLength = 99999999999999999999;
+	$("#chat-txt-message").bind("keydown", commandListener);
 	setInterval(textHandler, 0);
-	commandBox.addEventListener("keydown", commandListener);
 	API.chatLog(IWoot.iWoot + " Started!");
 	document.getElementsByClassName("chat-main")[0].scrollIntoView(false);
 	IWoot.Tools.log(IWoot.iWoot + " Started!");
