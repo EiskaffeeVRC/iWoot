@@ -38,7 +38,31 @@ API = {
 // Main things
 IWoot = {
 	iWoot: NAME + " " + VERSION,
-	log: function(String){console.log(String);},
+	Tools: {
+		lookForUser: function(String) {
+			var found = false;
+			for(var i = 0; i < $(".username").length; i++) {
+				if(String.toLowerCase() == $(".username")[i].innerHTML.toLowerCase()) {
+					found = true;
+				}
+			}
+			if(found) {
+				return true;
+			} else {
+				return false;
+			}
+		},
+		getUsers: function() {
+			var users = "";
+			for(var i = 0; i < $(".username").length; i++) {
+				if(!users.includes($(".username")[i].innerHTML) && $(".username")[i].innerHTML != undefined) {
+					users += "<li>@" + $(".username")[i].innerHTML + " </li>";
+				}
+			}
+			return users;
+		},
+		log: function(String){console.log(String);}
+	},
 	isAutoWoot: true,
 	isNoChatLimit: true,
 	isGUIHidden: true,
@@ -82,9 +106,12 @@ function loadGUI() {
 	$("#iwoot-gui").append('<div><b>/volume {VALUE} - Sets the volume to {VALUE} (0-100)</b></div>');
 	$("#iwoot-gui").append('<div><b>/emojis - Sends a link to an "Emoji" list</b></div>');
 	$("#iwoot-gui").append('<div><b>/share - Shares a link in chat to iWoot! <3</b></div>');
-	$("#iwoot-gui").append('<div><h1 id="iwoot-currentDJ"></h1></div>')
+	
+	$('<div id="iwoot-chat-extra" style="display:none;overflow:auto;height:125px;"></div>').insertBefore($("#new-messages-counter"));
+	
+
 		
-	IWoot.log("GUI Contents Loaded!");
+	IWoot.Tools.log("GUI Contents Loaded!");
 }
 
 // No use in the GUI if it does nothing...
@@ -123,20 +150,24 @@ function loadListeners() {
 		}
 	});
 	
-	IWoot.log("GUI Listeners Loaded!");
+	IWoot.Tools.log("GUI Listeners Loaded!");
 }
 
 function checkForEmotes() {
 	// https://i.imgur.com/U8PrnfU.gif :hug:
 	// ( ͡° ͜ʖ ͡°) :lennyface:
+	// https://i.imgur.com/L5eZObb.gif :fangirling:
 	
 	var tempString = Dubtrack.room.chat._messagesEl[0].innerHTML;
 	
 	if(tempString.includes(":hug:")) {
-		Dubtrack.room.chat._messagesEl[0].innerHTML = tempString.replaceAll(":hug:", '<img class="emoji" src="https://i.imgur.com/U8PrnfU.gif"></img>', true);
+		Dubtrack.room.chat._messagesEl[0].innerHTML = tempString.replaceAll(":hug:", '<img class="emoji" src="https://i.imgur.com/U8PrnfU.gif"></img>');
 	}
 	if(tempString.includes(":lennyface:")) {
-		Dubtrack.room.chat._messagesEl[0].innerHTML = tempString.replaceAll(":lennyface:", '( ͡° ͜ʖ ͡°)', true);
+		Dubtrack.room.chat._messagesEl[0].innerHTML = tempString.replaceAll(":lennyface:", '( ͡° ͜ʖ ͡°)');
+	}
+	if(tempString.includes(":fangirling:")) {
+		Dubtrack.room.chat._messagesEl[0].innerHTML = tempString.replaceAll(":fangirling:", '<img class="emoji" src="https://i.imgur.com/L5eZObb.gif"></img>');
 	}
 }
 
@@ -180,32 +211,39 @@ function connectHTML() {
 	autoDubUpButton = document.getElementById("iwoot-autodubup");
 	noChatLimitButton = document.getElementById("iwoot-chatlimit");
 	commandBox = document.getElementById("iwoot-commandbox");
-	IWoot.log("HTML Variables connected to their HTML parts!");
-}
-
-// Time to make use of the API.on() function...
-function updateDJ() {
-	var tempString = $(".currentDJSong")[0].innerHTML;
-	var DJ = tempString.slice(0, tempString.length - 11);
-	
-	$("#iwoot-currentDJ").html("Current DJ: " + DJ);
+	IWoot.Tools.log("HTML Variables connected to their HTML parts!");
 }
 
 // Might as well do something with it
 function connectAPI() {
 	API.on(API.CHAT, checkForEmotes);
 	API.on(API.ADVANCE, autoDubUp);
-	API.on(API.ADVANCE, updateDJ);
 	
-	IWoot.log("API Connected!");
+	IWoot.Tools.log("API Connected!");
 }
 
-// I need this for the terminate
-function disconnectAPI() {
-	API.off(API.CHAT, checkForEmotes);
-	API.off(API.ADVANCE, autoDubUp);
+function textHandler() {
+	var text = $("#chat-txt-message").val();
 	
-	IWoot.log("API Disconnected!");
+	if(text.includes("@") || text.includes(":")) {
+		$("#iwoot-chat-extra").show(250);
+		if(text.includes("@")) {
+			if($("#iwoot-chat-extra").html() != IWoot.Tools.getUsers()) {
+				$("#iwoot-chat-extra").html(IWoot.Tools.getUsers());
+			}
+		}
+		if(text.includes(":")) {
+			var emotes = '<li>:hug: <img class="emoji" src="https://i.imgur.com/U8PrnfU.gif"></img></li>\n';
+			emotes += "<li>:lennyface: ( ͡° ͜ʖ ͡°)</li>\n";
+			emotes += '<li>:fangirling: <img class="emoji" src="https://i.imgur.com/L5eZObb.gif"></img></li>';
+			
+			if($("#iwoot-chat-extra").html() != emotes) {
+				$("#iwoot-chat-extra").html(emotes);
+			}
+		}
+	} else {
+		$("#iwoot-chat-extra").hide("fast");
+	}
 }
 
 // Its useless without this...
@@ -214,12 +252,12 @@ function startUp() {
 	connectHTML();
 	connectAPI();
 	loadListeners();
-	updateDJ();
 	document.getElementById("chat-txt-message").maxLength = 99999999999999999999;
+	setInterval(textHandler, 0);
 	commandBox.addEventListener("keydown", commandListener);
 	API.chatLog(IWoot.iWoot + " Started!");
 	document.getElementsByClassName("chat-main")[0].scrollIntoView(false);
-	IWoot.log(IWoot.iWoot + " Started!");
+	IWoot.Tools.log(IWoot.iWoot + " Started!");
 }
 
 startUp();
