@@ -11,6 +11,17 @@ var autoDubUpButton;
 var noChatLimitButton;
 var commandBox;
 
+String.prototype.replaceAll = function(token, newToken) {
+	var str = this;
+	var index = str.indexOf(token);
+	
+	while(index != -1) {
+		str = str.replace(token, newToken);
+		index = str.indexOf(token);
+	}
+return str;
+};
+
 API = {
 	chatLog: function(String){Dubtrack.room.chat._messagesEl.append("<li id='chatlog'><b>" + String + "<b></li>");}, //MikuPlugin
 	sendChat: function(String){
@@ -55,7 +66,7 @@ function loadGUI() {
 	var noChatLimitStyle = "#iwoot-chatlimit{color:" + Color.GREEN + ";}";
 	var commandBoxStyle = "#iwoot-commandbox{color:" + Color.GREEN + ";border:1px solid" + Color.GREEN + ";background:" + Color.BLACK + "}";
 	var chatLogStyle = "#chatlog{font-size:0.75em;color:" + Color.GREEN_YELLOW + "}";
-	var iWootToggleStyle = ".iwoot-toggle{cursor:pointer;}";
+	var iWootToggleStyle = ".iwoot-toggle{cursor:pointer;font-weight:bold;}";
 	
 	var mainGUIStyles = "<style>" + mainGUIStyle + autoDubUpStyle + noChatLimitStyle + commandBoxStyle + chatLogStyle + iWootToggleStyle + "</style>";
 		
@@ -80,12 +91,11 @@ function loadGUI() {
 function loadListeners() {
 	$("#iwoot-gui-options").click(function() {
 		if(!IWoot.isGUIHidden == false) {
+			$("#iwoot-gui-main").show(500);
 			document.getElementById("iwoot-gui-main").style.display = "block";
-			$("#iwoot-gui").show(250);
 			IWoot.isGUIHidden = false;
 		} else {
-			$("#iwoot-gui").hide("fast");
-			document.getElementById("iwoot-gui-main").style.display = "none";
+			$("#iwoot-gui-main").hide("slow");
 			IWoot.isGUIHidden = true;
 		}
 	});
@@ -118,6 +128,16 @@ function loadListeners() {
 
 function checkForEmotes() {
 	// https://i.imgur.com/U8PrnfU.gif :hug:
+	// ( ͡° ͜ʖ ͡°) :lennyface:
+	
+	var tempString = Dubtrack.room.chat._messagesEl[0].innerHTML;
+	
+	if(tempString.includes(":hug:")) {
+		Dubtrack.room.chat._messagesEl[0].innerHTML = tempString.replaceAll(":hug:", '<img class="emoji" src="https://i.imgur.com/U8PrnfU.gif"></img>', true);
+	}
+	if(tempString.includes(":lennyface:")) {
+		Dubtrack.room.chat._messagesEl[0].innerHTML = tempString.replaceAll(":lennyface:", '( ͡° ͜ʖ ͡°)', true);
+	}
 }
 
 function commandListener(event) {
