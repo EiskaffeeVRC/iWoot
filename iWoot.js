@@ -68,8 +68,8 @@ if(!isIWootRunning) {
 				}
 				if(found) {
 					return true;
-				} e	lse {
-				r	eturn false;
+				} else {
+				return false;
 				}
 			},
 			getUsers: function() {
