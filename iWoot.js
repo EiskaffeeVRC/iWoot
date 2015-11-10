@@ -8,6 +8,7 @@ var mehButton;
 var iWootButton;
 var iWootGui;
 var autoDubUpButton;
+var afkMessageButton;
 var noChatLimitButton;
 
 String.prototype.replaceAll = function(token, newToken) {
@@ -21,22 +22,34 @@ String.prototype.replaceAll = function(token, newToken) {
 return str;
 };
 
+// Plug.DJ Ported API for Dubtrack.FM
 API = {
+	getDJ: function() {
+		var tempString=$(".currentDJSong")[0].innerHTML;
+		var DJ=tempString.slice(0,tempString.length-11);
+		return DJ;
+	},
 	chatLog: function(String){
-		Dubtrack.room.chat._messagesEl.append("<div id='chatlog'><b>" + String + "<b></div>");
+		Dubtrack.room.chat._messagesEl.append("<li class='chat-system-loading system-error' id='chatlog'>" + String + "</li>");
 		document.getElementsByClassName("chat-main")[0].scrollIntoView(false);
 	}, //MikuPlugin
 	sendChat: function(String){
 		$("#chat-txt-message").val(String);
 		Dubtrack.room.chat.sendMessage();
 	}, // MikuPlugin
-	setVolume: function(Value){Dubtrack.playerController.setVolume(Value);},
+	setVolume: function(Value){
+		Dubtrack.playerController.setVolume(Value);
+	},
 	CHAT: "realtime:chat-message",
 	ADVANCE: "realtime:room_playlist-update",
 	USER_JOIN: "realtime:user-join",
 	USER_LEAVE: "realtime:user-leave",
-	on: function(Event, Function){Dubtrack.Events.bind(Event, Function);},
-	off: function(Event, Function){Dubtrack.Events.unbind(Event, Function);}
+	on: function(Event, Function){
+		Dubtrack.Events.bind(Event, Function);
+	},
+	off: function(Event, Function){
+		Dubtrack.Events.unbind(Event, Function);
+	}
 };
 
 // Main things
@@ -92,7 +105,7 @@ function loadGUI() {
 	var mainGUIStyle = "#iwoot-gui-main{opacity:0.8;z-index:99999;display:none;position:fixed;width:300px;height:100%;text-align:center;background-color:" + Color.DARK_PURPLE + ";color:" + Color.CYAN + ";border:1px solid gray;}";
 	var autoDubUpStyle = "#iwoot-autodubup{color:" + Color.GREEN + ";}";
 	var noChatLimitStyle = "#iwoot-chatlimit{color:" + Color.GREEN + ";}";
-	var chatLogStyle = "#chatlog{font-size:0.8em;color:" + Color.GREEN_YELLOW + ";padding:0px;}";
+	var chatLogStyle = "#chatlog{color:" + Color.GREEN_YELLOW + ";}";
 	var iWootToggleStyle = ".iwoot-toggle{cursor:pointer;font-weight:bold;font-size:15px;}";
 	
 	var mainGUIStyles = "<style>" + mainGUIStyle + autoDubUpStyle + noChatLimitStyle + chatLogStyle + iWootToggleStyle + "</style>";
@@ -106,10 +119,6 @@ function loadGUI() {
 	$("#iwoot-gui").append('<div><span id="iwoot-autodubup" class="iwoot-toggle">AutoDupUp</span></div>');
 	$("#iwoot-gui").append('<div><span id="iwoot-chatlimit" class="iwoot-toggle">No Chat Limit</span></div>');
 	
-	$('<div id="iwoot-chat-extra" style="background-color:' + Color.BLACK + ';display:none;overflow:auto;height:100px;"></div>').insertBefore($("#new-messages-counter"));
-	
-
-		
 	IWoot.Tools.log("GUI Contents Loaded!");
 }
 
@@ -170,44 +179,12 @@ function checkForEmotes() {
 	}
 }
 
-function commandListener(event) {
-	keyCode = event.keyCode;
-	
-	message = $("#chat-txt-message").val();
-	
-	if(keyCode == 13) {
-		event.stopImmediatePropagation();
-		
-		if(message.startsWith("/")) {
-			if(message === "/help") {
-				API.chatLog(IWoot.iWoot + " User commands:");
-				API.chatLog("* /help - Displays this message");
-				API.chatLog("* /volume {Value} - Sets the volume to {Value} (0-100)");
-				API.chatLog("* /list - Returns a list of users in the current room");
-				API.chatLog("* /emojis - Sends a link to *your* chat to an 'Emoji Cheat Sheet'");
-				API.chatLog("* /share - Sends *everyone* a link in chat to iWoot! <3");
-			}
-			if(message.startsWith("/volume")) {
-				var VOLUME = parseInt(message.replace(" ", "").substring(7));
-				API.setVolume(VOLUME);
-				Dubtrack.room.chat.chatSound.play();
-			}
-			if(message === "/list") {
-				API.chatLog(IWoot.Tools.getUsers());
-			}
-			if(message  === "/emojis") {
-				API.chatLog('Emoji Cheat Sheet <a href="http://emoji-cheat-sheet.com" target="_blank">(Click Me)</a>')
-				Dubtrack.room.chat.chatSound.play();
-			}
-			if(message === "/share") {
-				API.sendChat("Get iWoot here! http://xxskhxx.comoj.com/tools.php <3");
-				Dubtrack.room.chat.chatSound.play();
-			}
-			$("#chat-txt-message").val("");
-		} else {
-			API.sendChat(message);
-		}
-	}
+function userJoinMsg(data) {
+	API.chatLog("@" + data.user.username + " has joined the room");
+}
+
+function userLeaveMsg(data) {
+	API.chatLog("@" + data.user.username + " has left the room");
 }
 
 function autoDubUp() {
@@ -231,6 +208,8 @@ function connectHTML() {
 function connectAPI() {
 	API.on(API.CHAT, checkForEmotes);
 	API.on(API.ADVANCE, autoDubUp);
+	API.on(API.USER_JOIN, userJoinMsg);
+	API.on(API.USER_LEAVE, userLeaveMsg);
 	
 	IWoot.Tools.log("API Connected!");
 }
@@ -238,24 +217,9 @@ function connectAPI() {
 function textHandler(event) {
 	var text = $("#chat-txt-message").val();
 	
-	if(text.includes(":") || text.startsWith("/")) {
-		if(text.includes(":")) {
-			$("#iwoot-chat-extra").show(250);
-			var emotes = "";
-			emotes += '<li>:hug: <img class="emoji" src="https://i.imgur.com/U8PrnfU.gif"></img></li>';
-			emotes += '<li>:lennyface: ( ͡° ͜ʖ ͡°)</li>';
-			emotes += '<li>:fangirling: <img class="emoji" src="https://i.imgur.com/L5eZObb.gif"></img></li>';
-			
-			if($("#iwoot-chat-extra").html() != emotes) {
-				$("#iwoot-chat-extra").html(emotes);
-				$("#chat-txt-message").css("border", "0px");
-			}
-		}
-		if(text.startsWith("/")) {
-			$("#chat-txt-message").css("border", "1px solid " + Color.GREEN);
-		}
+	if(text.startsWith("/")) {
+		$("#chat-txt-message").css("border", "1px solid " + Color.GREEN);
 	} else {
-		$("#iwoot-chat-extra").hide("fast");
 		$("#chat-txt-message").css("border", "0px");
 	}
 }
@@ -267,7 +231,6 @@ function startUp() {
 	connectAPI();
 	loadListeners();
 	document.getElementById("chat-txt-message").maxLength = 99999999999999999999;
-	$("#chat-txt-message").bind("keydown", commandListener);
 	setInterval(textHandler, 0);
 	API.chatLog(IWoot.iWoot + " Started!");//
 	IWoot.Tools.log(IWoot.iWoot + " Started!");
