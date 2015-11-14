@@ -7,12 +7,11 @@ if(!isIWootRunning) {
 
 	// Identifiers for the HTML parts
 	var wootButton;
-	var mehButton;
 	var iWootButton;
 	var iWootGui;
 	var autoDubUpButton;
-	var afkMessageButton;
 	var noChatLimitButton;
+	var userJoinLeaveButton;
 
 	String.prototype.replaceAll = function(token, newToken) {
 		var str = this;
@@ -33,7 +32,7 @@ if(!isIWootRunning) {
 			return DJ;
 		},
 		chatLog: function(String){
-			Dubtrack.room.chat._messagesEl.append("<li class='chat-system-loading system-error' id='chatlog'>" + String + "</li>");
+			Dubtrack.room.chat._messagesEl.append("<li class='chat-system-loading system-error'>" + String + "</li>");
 			document.getElementsByClassName("chat-main")[0].scrollIntoView(false);
 		}, //MikuPlugin
 		sendChat: function(String){
@@ -85,6 +84,7 @@ if(!isIWootRunning) {
 		},
 		isAutoWoot: true,
 		isNoChatLimit: true,
+		isUserJoinLeave: true,
 		isGUIHidden: true,
 	};
 
@@ -108,19 +108,20 @@ if(!isIWootRunning) {
 		var mainGUIStyle = "#iwoot-gui-main{opacity:0.8;z-index:99999;display:none;position:fixed;width:300px;height:100%;text-align:center;background-color:" + Color.DARK_PURPLE + ";color:" + Color.CYAN + ";border:1px solid gray;}";
 		var autoDubUpStyle = "#iwoot-autodubup{color:" + Color.GREEN + ";}";
 		var noChatLimitStyle = "#iwoot-chatlimit{color:" + Color.GREEN + ";}";
-		var chatLogStyle = "#chatlog{color:" + Color.GREEN_YELLOW + ";}";
+		var userJoinLeaveStyle = "#iwoot-userjoinleave{color:" + Color.GREEN + ";}";
 		var iWootToggleStyle = ".iwoot-toggle{cursor:pointer;font-weight:bold;font-size:15px;}";
 	
-		var mainGUIStyles = "<style>" + mainGUIStyle + autoDubUpStyle + noChatLimitStyle + chatLogStyle + iWootToggleStyle + "</style>";
+		var mainGUIStyles = "<style>" + mainGUIStyle + autoDubUpStyle + noChatLimitStyle + userJoinLeaveStyle + iWootToggleStyle + "</style>";
 		
 		$("body").append(mainGUIStyles);
 	
 		$(".header-left-navigation").append('<a class="navigate room-active-link active-room" id="main-room-active-link"><span class="icon-chevron"></span><span class="room-name" id="iwoot-gui-options">iWoot</span></a>');
 		$('<div id="iwoot-gui-main"></div>').insertBefore($("#main-section"));
 		$("#iwoot-gui-main").append('<div style="font-size:0.75em;opacity:1.0;"><span id="iwoot-gui"></span></div>');
-		$("#iwoot-gui").append("<hr></hr><h1><b>iWoot</b></h1><hr></hr>");
+		$("#iwoot-gui").append('<hr></hr><h1><b>iWoot</b></h1><hr></hr>');
 		$("#iwoot-gui").append('<div><span id="iwoot-autodubup" class="iwoot-toggle">AutoDupUp</span></div>');
 		$("#iwoot-gui").append('<div><span id="iwoot-chatlimit" class="iwoot-toggle">No Chat Limit</span></div>');
+		$("#iwoot-gui").append('<div><span id="iwoot-userjoinleave" class="iwoot-toggle">User Join/Leave Chat Alerts</span></div>');
 	
 		IWoot.Tools.log("GUI Contents Loaded!");
 	}
@@ -160,6 +161,16 @@ if(!isIWootRunning) {
 				document.getElementById("chat-txt-message").maxLength = 140;
 			}
 		});
+		
+		$("#iwoot-userjoinleave").click(function() {
+			if(!IWoot.isUserJoinLeave) {
+				IWoot.isUserJoinLeave = true;
+				userJoinLeaveButton.style.color = Color.GREEN;
+			} else {
+				IWoot.isUserJoinLeave = false;
+				userJoinLeaveButton.style.color = Color.RED;
+			}
+		});
 	
 		IWoot.Tools.log("GUI Listeners Loaded!");
 	}
@@ -183,11 +194,15 @@ if(!isIWootRunning) {
 	}
 
 	function userJoinMsg(data) {
-		API.chatLog("@" + data.user.username + " has joined the room");
+		if(IWoot.isUserJoinLeave) {
+				API.chatLog("@" + data.user.username + " has joined the room");
+		}
 	}
 
 	function userLeaveMsg(data) {
-		API.chatLog("@" + data.user.username + " has left the room");
+		if(IWoot.isUserJoinLeave) {
+				API.chatLog("@" + data.user.username + " has left the room");
+		}
 	}
 
 	function autoDubUp() {
@@ -199,11 +214,11 @@ if(!isIWootRunning) {
 	// Its just easier for me sometimes...
 	function connectHTML() {
 		wootButton = $(".icon-arrow-up");
-		mehButton = $(".icon-arrow-down");
 		iWootButton = document.getElementById("iwoot-gui-options");
 		iWootGui = document.getElementById("iwoot-gui-main");
 		autoDubUpButton = document.getElementById("iwoot-autodubup");
 		noChatLimitButton = document.getElementById("iwoot-chatlimit");
+		userJoinLeaveButton = document.getElementById("iwoot-userjoinleave");
 		IWoot.Tools.log("HTML Variables connected to their HTML parts!");
 	}
 
