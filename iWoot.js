@@ -257,5 +257,5 @@ if(!isIWootRunning) {
 
 	startUp();
 } else {
-	Dubtrack.helpers.displayError("Error!", "iWoot Already Running!");
+	Dubtrack.helpers.displayError("Error!", "iWoot is already running!");
 }
