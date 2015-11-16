@@ -238,7 +238,7 @@ if(!isIWootRunning) {
 		connectHTML();
 		connectAPI();
 		loadListeners();
-		autoDupUp();
+		autoDubUp();
 		document.getElementById("chat-txt-message").maxLength = 99999999999999999999;
 		// *Special* code for Apple mobile users (iPod, iPhone, iPad)
 		var minimizeBar = document.createElement("meta");
