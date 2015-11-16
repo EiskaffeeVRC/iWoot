@@ -238,6 +238,7 @@ if(!isIWootRunning) {
 		connectHTML();
 		connectAPI();
 		loadListeners();
+		autoDupUp();
 		document.getElementById("chat-txt-message").maxLength = 99999999999999999999;
 		// *Special* code for Apple mobile users (iPod, iPhone, iPad)
 		var minimizeBar = document.createElement("meta");
@@ -245,7 +246,7 @@ if(!isIWootRunning) {
 		minimizeBar.content = "yes";
 		document.getElementsByTagName("head")[0].appendChild(minimizeBar);
 		isIWootRunning = true;
-		API.chatLog(IWoot.iWoot + " Started!");//
+		API.chatLog(IWoot.iWoot + " Started!");
 		IWoot.Tools.log(IWoot.iWoot + " Started!");
 
 	}
