@@ -13,13 +13,13 @@ if(!isIWootRunning) {
 	var noChatLimitButton;
 	var userJoinLeaveButton;
 
-	String.prototype.replaceAll = function(token, newToken) {
+	String.prototype.replaceAll = function(String, newString) {
 		var str = this;
-		var index = str.indexOf(token);
+		var index = str.indexOf(String);
 	
 		while(index != -1) {
-			str = str.replace(token, newToken);
-			index = str.indexOf(token);
+			str = str.replace(String, newString);
+			index = str.indexOf(String);
 		}
 	return str;
 	};
@@ -27,29 +27,51 @@ if(!isIWootRunning) {
 	// Plug.DJ Ported API for Dubtrack.FM
 	API = {
 		getDJ: function() {
-			var tempString=$(".currentDJSong")[0].innerHTML;
-			var DJ=tempString.slice(0,tempString.length-11);
-			return DJ;
+			return Dubtrack.room.player.activeSong.attributes.user.attributes.username;
 		},
-		chatLog: function(String){
+		getMedia: function() {
+			return Dubtrack.room.player.activeSong.attributes.songInfo.name;
+		},
+		getRole: function(User) {
+			if(User.attributes.roleid != null) {
+				if(User.attributes.roleid.type == "dj") {
+					return "(Resident?) DJ";
+				}
+				if(User.attributes.roleid.type == "vip") {
+					return "VIP";
+				}
+				if(User.attributes.roleid.type == "mod") {
+					return "Moderator";
+				}
+				if(User.attributes.roleid.type == "manager") {
+					return "Manager";
+				}
+				if(User.attributes.roleid.type == "co-owner") {
+					return "Co-Owner (or Owner)";
+				}
+			} else {
+				return "Role not found! (Most likely means default user)";
+			}
+		},
+		chatLog: function(String) {
 			Dubtrack.room.chat._messagesEl.append("<li class='chat-system-loading system-error'>" + String + "</li>");
 			document.getElementsByClassName("chat-main")[0].scrollIntoView(false);
 		}, //MikuPlugin
-		sendChat: function(String){
-			$("#chat-txt-message").val(String);
+		sendChat: function(String) {
+			Dubtrack.room.chat._messageInputEl.val(String);
 			Dubtrack.room.chat.sendMessage();
 		}, // MikuPlugin
-		setVolume: function(Value){
+		setVolume: function(Value) {
 			Dubtrack.playerController.setVolume(Value);
 		},
 		CHAT: "realtime:chat-message",
 		ADVANCE: "realtime:room_playlist-update",
 		USER_JOIN: "realtime:user-join",
 		USER_LEAVE: "realtime:user-leave",
-		on: function(Event, Function){
+		on: function(Event, Function) {
 			Dubtrack.Events.bind(Event, Function);
 		},
-		off: function(Event, Function){
+		off: function(Event, Function) {
 			Dubtrack.Events.unbind(Event, Function);
 		}
 	};
@@ -240,11 +262,6 @@ if(!isIWootRunning) {
 		loadListeners();
 		autoDubUp();
 		document.getElementById("chat-txt-message").maxLength = 99999999999999999999;
-		// *Special* code for Apple mobile users (iPod, iPhone, iPad)
-		var minimizeBar = document.createElement("meta");
-		minimizeBar.name = "apple-mobile-web-app-capable";
-		minimizeBar.content = "yes";
-		document.getElementsByTagName("head")[0].appendChild(minimizeBar);
 		isIWootRunning = true;
 		API.chatLog(IWoot.iWoot + " Started!");
 		IWoot.Tools.log(IWoot.iWoot + " Started!");
