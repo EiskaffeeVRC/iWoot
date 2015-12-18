@@ -58,7 +58,7 @@ if(!isIWootRunning) {
 			document.getElementsByClassName("chat-main")[0].scrollIntoView(false);
 		},
 		sendChat: function(msg) {
-			$("#chat-txt-message").text(msg);
+			$("#chat-txt-message").val(msg);
 			Dubtrack.room.chat.sendMessage();
 		},
 		setVolume: function(value) {
