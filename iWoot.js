@@ -1,6 +1,26 @@
 var isIWootRunning;
-
 if(!isIWootRunning) {
+	if (typeof Array.prototype.indexOf !== "function") {
+	    Array.prototype.indexOf = function (item) {
+	        for(var i = 0; i < this.length; i++) {
+	            if (this[i] === item) {
+	                return i;
+	            }
+	        }
+	        return -1;
+	    };
+	};
+	if(typeof String.prototype.replaceAll !== "function") {
+		String.prototype.replaceAll = function(oldString, newString) {
+			var theStr = this;
+			var index = theStr.indexOf(oldString);
+			while(index != -1) {
+				theStr = theStr.replace(oldString, newString);
+				index = theStr.indexOf(oldString);
+			}
+			return theStr;
+		};
+	};
 	// Name and Version
 	var NAME = "iWoot";
 	var VERSION = "v1.0.0";
@@ -13,17 +33,6 @@ if(!isIWootRunning) {
 	var noChatLimitButton;
 	var userJoinLeaveButton;
 
-	String.prototype.replaceAll = function(String, newString) {
-		var str = this;
-		var index = str.indexOf(String);
-	
-		while(index != -1) {
-			str = str.replace(String, newString);
-			index = str.indexOf(String);
-		}
-	return str;
-	};
-
 	// Plug.DJ Ported API for Dubtrack.FM
 	API = {
 		getDJ: function() {
@@ -34,20 +43,23 @@ if(!isIWootRunning) {
 		},
 		getRole: function(User) {
 			if(User.attributes.roleid != null) {
-				if(User.attributes.roleid.type == "dj") {
-					return "(Resident?) DJ";
-				}
-				if(User.attributes.roleid.type == "vip") {
+				var type = User.attributes.roleid.type.toLowerCase();
+				switch(type) {
+				case "dj":
+					return "DJ";
+					break;
+				case "vip":
 					return "VIP";
-				}
-				if(User.attributes.roleid.type == "mod") {
+					break;
+				case "mod":
 					return "Moderator";
-				}
-				if(User.attributes.roleid.type == "manager") {
+					break;
+				case "manager":
 					return "Manager";
-				}
-				if(User.attributes.roleid.type == "co-owner") {
+					break;
+				case "co-owner":
 					return "Co-Owner (or Owner)";
+					break;
 				}
 			} else {
 				return "Role not found! (Most likely means default user)";
@@ -58,7 +70,7 @@ if(!isIWootRunning) {
 			document.getElementsByClassName("chat-main")[0].scrollIntoView(false);
 		}, //MikuPlugin
 		sendChat: function(String) {
-			Dubtrack.room.chat._messageInputEl.val(String);
+			$("#chat-txt-message").text(String);
 			Dubtrack.room.chat.sendMessage();
 		}, // MikuPlugin
 		setVolume: function(Value) {
@@ -201,9 +213,7 @@ if(!isIWootRunning) {
 		// https://i.imgur.com/U8PrnfU.gif :hug:
 		// ( ͡° ͜ʖ ͡°) :lennyface:
 		// https://i.imgur.com/L5eZObb.gif :fangirling:
-	
-		var tempString = Dubtrack.room.chat._messagesEl[0].innerHTML;
-	
+		var tempString = $(".chat-main").html();
 		if(tempString.includes(":hug:")) {
 		Dubtrack.room.chat._messagesEl[0].innerHTML = tempString.replaceAll(":hug:", '<img class="emoji" src="https://i.imgur.com/U8PrnfU.gif"></img>');
 		}
@@ -261,7 +271,7 @@ if(!isIWootRunning) {
 		connectAPI();
 		loadListeners();
 		autoDubUp();
-		document.getElementById("chat-txt-message").maxLength = 99999999999999999999;
+		$("#chat-txt-message").attr("maxlength", "99999999999999999999");
 		isIWootRunning = true;
 		API.chatLog(IWoot.iWoot + " Started!");
 		IWoot.Tools.log(IWoot.iWoot + " Started!");
