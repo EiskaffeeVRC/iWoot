@@ -21,18 +21,6 @@ if(!isIWootRunning) {
 			return theStr;
 		};
 	};
-	// Name and Version
-	var NAME = "iWoot";
-	var VERSION = "v1.0.0";
-
-	// Identifiers for the HTML parts
-	var wootButton;
-	var iWootButton;
-	var iWootGui;
-	var autoDubUpButton;
-	var noChatLimitButton;
-	var userJoinLeaveButton;
-
 	// Plug.DJ Ported API for Dubtrack.FM
 	API = {
 		getDJ: function() {
@@ -65,63 +53,52 @@ if(!isIWootRunning) {
 				return "Role not found! (Most likely means default user)";
 			}
 		},
-		chatLog: function(String) {
-			Dubtrack.room.chat._messagesEl.append("<li class='chat-system-loading system-error'>" + String + "</li>");
+		chatLog: function(msg) {
+			Dubtrack.room.chat._messagesEl.append("<li class='chat-system-loading system-error'>" + msg + "</li>");
 			document.getElementsByClassName("chat-main")[0].scrollIntoView(false);
-		}, //MikuPlugin
-		sendChat: function(String) {
-			$("#chat-txt-message").text(String);
+		},
+		sendChat: function(msg) {
+			$("#chat-txt-message").text(msg);
 			Dubtrack.room.chat.sendMessage();
-		}, // MikuPlugin
-		setVolume: function(Value) {
-			Dubtrack.playerController.setVolume(Value);
+		},
+		setVolume: function(value) {
+			Dubtrack.playerController.setVolume(value);
 		},
 		CHAT: "realtime:chat-message",
 		ADVANCE: "realtime:room_playlist-update",
 		USER_JOIN: "realtime:user-join",
 		USER_LEAVE: "realtime:user-leave",
-		on: function(Event, Function) {
-			Dubtrack.Events.bind(Event, Function);
+		on: function(theEvent, theFunc) {
+			Dubtrack.Events.bind(theEvent, theFunc);
 		},
-		off: function(Event, Function) {
-			Dubtrack.Events.unbind(Event, Function);
+		off: function(theEvent, theFunc) {
+			Dubtrack.Events.unbind(theEvent, theFunc);
 		}
 	};
-
 	// Main things
 	IWoot = {
-		iWoot: NAME + " " + VERSION,
+		iWoot: "iWoot v1.0.0",
 		Tools: {
-			lookForUser: function(String) {
+			lookForUser: function(username) {
 				var found = false;
-				for(var i = 0; i < $(".username").length; i++) {
-					if(String.toLowerCase() == $(".username")[i].innerHTML.toLowerCase()) {
+				for(var i = 0; i < Dubtrack.room.users.collection.length; i++) {
+					if(username.toLowerCase() == Dubtrack.room.users.collection.at(i).attributes._user.username.toLowerCase()) {
 						found = true;
 					}
 				}
 				if(found) {
 					return true;
 				} else {
-				return false;
+					return false;
 				}
 			},
-			getUsers: function() {
-				var users = "";
-				for(var i = 0; i < $(".username").length; i++) {
-					if(!users.includes($(".username")[i].innerHTML) && $(".username")[i].innerHTML != undefined) {
-						users += "@" + $(".username")[i].innerHTML + " ";
-					}
-				}
-				return users;
-			},
-		log: function(String){console.log(String);}
+			log: function(String){console.log(String);}
 		},
 		isAutoWoot: true,
 		isNoChatLimit: true,
 		isUserJoinLeave: true,
 		isGUIHidden: true,
 	};
-
 	// Just easier for me to use this, plus it reminds me of Java's Color class
 	Color = {
 		RED: "#FF0000",
@@ -136,7 +113,6 @@ if(!isIWootRunning) {
 		GREEN_YELLOW: "#99CC00",
 		DARK_PURPLE: "#660066"
 	};
-
 	// Whats a plugin without a GUI?
 	function loadGUI() {
 		var mainGUIStyle = "#iwoot-gui-main{opacity:0.8;z-index:99999;display:none;position:fixed;width:300px;height:100%;text-align:center;background-color:" + Color.DARK_PURPLE + ";color:" + Color.CYAN + ";border:1px solid gray;}";
@@ -159,7 +135,6 @@ if(!isIWootRunning) {
 	
 		IWoot.Tools.log("GUI Contents Loaded!");
 	}
-
 	// No use in the GUI if it does nothing...
 	function loadListeners() {
 		$("#iwoot-gui-options").click(function() {
@@ -172,7 +147,6 @@ if(!isIWootRunning) {
 				IWoot.isGUIHidden = true;
 			}
 		});
-		
 		$("#iwoot-autodubup").click(function() {
 			if(!IWoot.isAutoWoot == true) {
 				IWoot.isAutoWoot = true;
@@ -183,7 +157,6 @@ if(!isIWootRunning) {
 				autoDubUpButton.style.color = Color.RED;
 			}
 		});
-	
 		$("#iwoot-chatlimit").click(function() {
 			if(!IWoot.isNoChatLimit) {
 				IWoot.isNoChatLimit = true;
@@ -195,7 +168,6 @@ if(!isIWootRunning) {
 				document.getElementById("chat-txt-message").maxLength = 140;
 			}
 		});
-		
 		$("#iwoot-userjoinleave").click(function() {
 			if(!IWoot.isUserJoinLeave) {
 				IWoot.isUserJoinLeave = true;
@@ -205,10 +177,8 @@ if(!isIWootRunning) {
 				userJoinLeaveButton.style.color = Color.RED;
 			}
 		});
-	
 		IWoot.Tools.log("GUI Listeners Loaded!");
 	}
-
 	function checkForEmotes() {
 		// https://i.imgur.com/U8PrnfU.gif :hug:
 		// ( ͡° ͜ʖ ͡°) :lennyface:
@@ -224,36 +194,21 @@ if(!isIWootRunning) {
 			Dubtrack.room.chat._messagesEl[0].innerHTML = tempString.replaceAll(":fangirling:", '<img class="emoji" src="https://i.imgur.com/L5eZObb.gif"></img>');
 		}
 	}
-
 	function userJoinMsg(data) {
 		if(IWoot.isUserJoinLeave) {
-				API.chatLog("@" + data.user.username + " has joined the room");
+			API.chatLog("@" + data.user.username + " has joined the room");
 		}
 	}
-
 	function userLeaveMsg(data) {
 		if(IWoot.isUserJoinLeave) {
-				API.chatLog("@" + data.user.username + " has left the room");
+			API.chatLog("@" + data.user.username + " has left the room");
 		}
 	}
-
 	function autoDubUp() {
 		if(IWoot.isAutoWoot) {
-			wootButton.click();
+			$(".dubup").click();
 		}
 	}
-
-	// Its just easier for me sometimes...
-	function connectHTML() {
-		wootButton = $(".icon-arrow-up");
-		iWootButton = document.getElementById("iwoot-gui-options");
-		iWootGui = document.getElementById("iwoot-gui-main");
-		autoDubUpButton = document.getElementById("iwoot-autodubup");
-		noChatLimitButton = document.getElementById("iwoot-chatlimit");
-		userJoinLeaveButton = document.getElementById("iwoot-userjoinleave");
-		IWoot.Tools.log("HTML Variables connected to their HTML parts!");
-	}
-
 	// Might as well do something with it
 	function connectAPI() {
 		API.on(API.CHAT, checkForEmotes);
@@ -263,11 +218,9 @@ if(!isIWootRunning) {
 	
 		IWoot.Tools.log("API Connected!");
 	}
-
 	// Its useless without this...
 	function startUp() {
 		loadGUI();
-		connectHTML();
 		connectAPI();
 		loadListeners();
 		autoDubUp();
@@ -275,9 +228,7 @@ if(!isIWootRunning) {
 		isIWootRunning = true;
 		API.chatLog(IWoot.iWoot + " Started!");
 		IWoot.Tools.log(IWoot.iWoot + " Started!");
-
 	}
-
 	startUp();
 } else {
 	Dubtrack.helpers.displayError("Error!", "iWoot is already running!");
