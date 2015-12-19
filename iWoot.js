@@ -58,8 +58,12 @@ if(!isIWootRunning) {
 			document.getElementsByClassName("chat-main")[0].scrollIntoView(false);
 		},
 		sendChat: function(msg) {
-			$("#chat-txt-message").val(msg);
-			Dubtrack.room.chat.sendMessage();
+			while($("#chat-txt-message").val() != msg) {
+				$("#chat-txt-message").val(msg);
+			}
+			if($("#chat-txt-message").val() == msg) {
+				Dubtrack.room.chat.sendMessage();
+			}
 		},
 		setVolume: function(value) {
 			Dubtrack.playerController.setVolume(value);
@@ -92,12 +96,13 @@ if(!isIWootRunning) {
 					return false;
 				}
 			},
-			log: function(String){console.log(String);}
+			log: function(String){console.log("[" + IWoot.iWoot + "] " + String);}
 		},
 		isAutoWoot: true,
 		isNoChatLimit: true,
 		isUserJoinLeave: true,
 		isGUIHidden: true,
+		isWorkMode: false
 	};
 	// Just easier for me to use this, plus it reminds me of Java's Color class
 	Color = {
@@ -115,13 +120,15 @@ if(!isIWootRunning) {
 	};
 	// Whats a plugin without a GUI?
 	function loadGUI() {
-		var mainGUIStyle = "#iwoot-gui-main{opacity:0.8;z-index:99999;display:none;position:fixed;width:300px;height:100%;text-align:center;background-color:" + Color.DARK_PURPLE + ";color:" + Color.CYAN + ";border:1px solid gray;}";
+		var mainGUIStyle = "#iwoot-gui-main{opacity:0.8;z-index:99999;display:none;position:fixed;width:300px;text-align:center;background:" + Color.DARK_PURPLE + ";color:" + Color.CYAN + ";border:1px solid gray;}";
 		var autoDubUpStyle = "#iwoot-autodubup{color:" + Color.GREEN + ";}";
 		var noChatLimitStyle = "#iwoot-chatlimit{color:" + Color.GREEN + ";}";
 		var userJoinLeaveStyle = "#iwoot-userjoinleave{color:" + Color.GREEN + ";}";
+		var videoToggleStyle = "#iwoot-togglevideo{color:" + Color.RED + ";}";
+		var workModeStyle = "#iwoot-workmode{color:" + Color.RED + ";}";
 		var iWootToggleStyle = ".iwoot-toggle{cursor:pointer;font-weight:bold;font-size:15px;}";
 	
-		var mainGUIStyles = "<style>" + mainGUIStyle + autoDubUpStyle + noChatLimitStyle + userJoinLeaveStyle + iWootToggleStyle + "</style>";
+		var mainGUIStyles = "<style>" + mainGUIStyle + autoDubUpStyle + noChatLimitStyle + userJoinLeaveStyle + videoToggleStyle + workModeStyle + iWootToggleStyle + "</style>";
 		
 		$("body").append(mainGUIStyles);
 	
@@ -132,49 +139,73 @@ if(!isIWootRunning) {
 		$("#iwoot-gui").append('<div><span id="iwoot-autodubup" class="iwoot-toggle">AutoDupUp</span></div>');
 		$("#iwoot-gui").append('<div><span id="iwoot-chatlimit" class="iwoot-toggle">No Chat Limit</span></div>');
 		$("#iwoot-gui").append('<div><span id="iwoot-userjoinleave" class="iwoot-toggle">User Join/Leave Chat Alerts</span></div>');
+		$("#iwoot-gui").append('<hr></hr><h1><b>Modes</b></h1><hr></hr>');
+		$("#iwoot-gui").append('<div><span id="iwoot-togglevideo" class="iwoot-toggle">Toggle Video (Keep Controls)</span></div>');
+		$("#iwoot-gui").append('<div><span id="iwoot-workmode" class="iwoot-toggle">Work Mode</span></div>');
 	
 		IWoot.Tools.log("GUI Contents Loaded!");
 	}
 	// No use in the GUI if it does nothing...
 	function loadListeners() {
 		$("#iwoot-gui-options").click(function() {
-			if(!IWoot.isGUIHidden == false) {
-				$("#iwoot-gui-main").show(500);
-				document.getElementById("iwoot-gui-main").style.display = "block";
-				IWoot.isGUIHidden = false;
-			} else {
+			if(!IWoot.isGUIHidden) {
 				$("#iwoot-gui-main").hide("slow");
 				IWoot.isGUIHidden = true;
+			} else {
+				$("#iwoot-gui-main").show(500);
+				$("#iwoot-gui-main").css("display", "block");
+				IWoot.isGUIHidden = false;
 			}
 		});
 		$("#iwoot-autodubup").click(function() {
-			if(!IWoot.isAutoWoot == true) {
+			if(!IWoot.isAutoWoot) {
 				IWoot.isAutoWoot = true;
-				autoDubUpButton.style.color = Color.GREEN;
+				$("#iwoot-autodubup").css("color", Color.GREEN);
 				autoDubUp();
 			} else {
 				IWoot.isAutoWoot = false;
-				autoDubUpButton.style.color = Color.RED;
+				$("#iwoot-autodubup").css("color", Color.RED);
 			}
 		});
 		$("#iwoot-chatlimit").click(function() {
 			if(!IWoot.isNoChatLimit) {
 				IWoot.isNoChatLimit = true;
-				noChatLimitButton.style.color = Color.GREEN;
-				document.getElementById("chat-txt-message").maxLength = 99999999999999999999;
+				$("#iwoot-chatlimit").css("color", Color.GREEN);
+				$("#chat-txt-message").attr("maxlength", "99999999999999999999");
 			} else {
 				IWoot.isNoChatLimit = false;
-				noChatLimitButton.style.color = Color.RED;
-				document.getElementById("chat-txt-message").maxLength = 140;
+				$("#iwoot-chatlimit").css("color", Color.RED);
+				$("#chat-txt-message").attr("maxlength", "255");
 			}
 		});
 		$("#iwoot-userjoinleave").click(function() {
 			if(!IWoot.isUserJoinLeave) {
 				IWoot.isUserJoinLeave = true;
-				userJoinLeaveButton.style.color = Color.GREEN;
+				$("#iwoot-userjoinleave").css("color", Color.GREEN);
 			} else {
 				IWoot.isUserJoinLeave = false;
-				userJoinLeaveButton.style.color = Color.RED;
+				$("#iwoot-userjoinleave").css("color", Color.RED);
+			}
+		});
+		$("#iwoot-togglevideo").click(function() {
+			var videoHidden = $(".hideVideo-el.show.active").length != 0 ? true : false;
+			if(!videoHidden) {
+				$(".hideVideo-el").click();
+				$("#iwoot-togglevideo").css("color", Color.GREEN);
+			} else {
+				$(".hideVideo-el").click();
+				$("#iwoot-togglevideo").css("color", Color.RED);
+			}
+		});
+		$("#iwoot-workmode").click(function() {
+			if(!IWoot.isWorkMode) {
+				$(".main-room-wrapper").css("display", "none");
+				$("#iwoot-workmode").css("color", Color.GREEN);
+				IWoot.isWorkMode = true;
+			} else {
+				$(".main-room-wrapper").css("display", "block");
+				$("#iwoot-workmode").css("color", Color.RED);
+				IWoot.isWorkMode = false;
 			}
 		});
 		IWoot.Tools.log("GUI Listeners Loaded!");
@@ -209,7 +240,7 @@ if(!isIWootRunning) {
 			$(".dubup").click();
 		}
 	}
-	// Might as well do something with it
+	// Might as well do something productive with the API
 	function connectAPI() {
 		API.on(API.CHAT, checkForEmotes);
 		API.on(API.ADVANCE, autoDubUp);
@@ -218,7 +249,7 @@ if(!isIWootRunning) {
 	
 		IWoot.Tools.log("API Connected!");
 	}
-	// Its useless without this...
+	// Its quite useless without this...
 	function startUp() {
 		loadGUI();
 		connectAPI();
