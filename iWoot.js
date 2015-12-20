@@ -54,8 +54,27 @@ if(!isIWootRunning) {
 			}
 		},
 		chatLog: function(msg) {
-			Dubtrack.room.chat._messagesEl.append("<li class='chat-system-loading system-error'>" + msg + "</li>");
-			document.getElementsByClassName("chat-main")[0].scrollIntoView(false);
+			Dubtrack.room.chat.appendItem(new Dubtrack.Model.chat({
+				user: {
+					_force_updated: null,
+					userInfo: {
+						_id: "565aa52e6fe207830052f580",
+						userid: "565aa52e6fe207830052f57f",
+						__v: 0
+					},
+					_id: "565aa52e6fe207830052f57f",
+					username: "",
+					status: 1,
+					roleid: 1,
+					dubs: 0,
+					created: 0,
+					__v: 0
+				},
+				message: msg,
+				time: Date.now(),
+				realTimeChannel: Dubtrack.room.model.get("realTimeChannel"),
+				type: "chat-message"}
+			));
 		},
 		sendChat: function(msg) {
 			while($("#chat-txt-message").val() != msg) {
@@ -120,7 +139,7 @@ if(!isIWootRunning) {
 	};
 	// Whats a plugin without a GUI?
 	function loadGUI() {
-		var mainGUIStyle = "#iwoot-gui-main{opacity:0.8;z-index:99999;display:none;position:fixed;width:300px;text-align:center;background:" + Color.DARK_PURPLE + ";color:" + Color.CYAN + ";border:1px solid gray;}";
+		var mainGUIStyle = "#iwoot-gui-main{opacity:0.8;z-index:99999;display:none;position:fixed;width:300px;text-align:center;background:" + Color.DARK_PURPLE + ";color:" + Color.CYAN + ";border:1px solid gray;border-bottom-right-radius:10px;}";
 		var autoDubUpStyle = "#iwoot-autodubup{color:" + Color.GREEN + ";}";
 		var noChatLimitStyle = "#iwoot-chatlimit{color:" + Color.GREEN + ";}";
 		var userJoinLeaveStyle = "#iwoot-userjoinleave{color:" + Color.GREEN + ";}";
