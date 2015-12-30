@@ -73,8 +73,9 @@ if(!isIWootRunning) {
 				message: msg,
 				time: Date.now(),
 				realTimeChannel: Dubtrack.room.model.get("realTimeChannel"),
-				type: "chat-message"}
-			));
+				type: "chat-message"
+			}
+		));
 		},
 		sendChat: function(msg) {
 			while($("#chat-txt-message").val() != msg) {
@@ -161,6 +162,9 @@ if(!isIWootRunning) {
 		$("#iwoot-gui").append('<hr></hr><h1><b>Modes</b></h1><hr></hr>');
 		$("#iwoot-gui").append('<div><span id="iwoot-togglevideo" class="iwoot-toggle">Toggle Video (Keep Controls)</span></div>');
 		$("#iwoot-gui").append('<div><span id="iwoot-workmode" class="iwoot-toggle">Work Mode</span></div>');
+		$("#iwoot-gui").append('<hr></hr><h1><b>Extra</b></h1><hr></hr>');
+		$("#iwoot-gui").append('<div><span class="iwoot-toggle"><a href="http://emoji-cheat-sheet.com" target="_blank">Emoji Cheat Sheet</a></span></div>');
+		$("#iwoot-gui").append('<hr></hr>');
 	
 		IWoot.Tools.log("GUI Contents Loaded!");
 	}
