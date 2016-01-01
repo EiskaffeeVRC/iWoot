@@ -63,7 +63,7 @@ if(!isIWootRunning) {
 						__v: 0
 					},
 					_id: "565aa52e6fe207830052f57f",
-					username: "",
+					username: "iWoot Chatlog Bot",
 					status: 1,
 					roleid: 1,
 					dubs: 0,
@@ -90,6 +90,7 @@ if(!isIWootRunning) {
 		},
 		CHAT: "realtime:chat-message",
 		ADVANCE: "realtime:room_playlist-update",
+		SCORE_UPDATE: "",
 		USER_JOIN: "realtime:user-join",
 		USER_LEAVE: "realtime:user-leave",
 		on: function(theEvent, theFunc) {
@@ -248,6 +249,50 @@ if(!isIWootRunning) {
 			Dubtrack.room.chat._messagesEl[0].innerHTML = tempString.replaceAll(":fangirling:", '<img class="emoji" src="https://i.imgur.com/L5eZObb.gif"></img>');
 		}
 	}
+	
+	function commandHandler(data) {
+		var msg = data.message;
+		var user = data.user.username;
+		var userId = data.user._id;
+		
+		if(user == Dubtrack.session.get("username")) {
+			if(msg.substring(0, 1) == "/") {
+				var cmd = msg.substring(1);
+				if(cmd.startsWith("cookie")) {
+					var UN = cmd.substring(8);
+					if(UN != "") {
+						if(IWoot.Tools.lookForUser(UN)) {
+							API.sendChat(":cookie: *hands @" + UN + " a cookie, a note on it reads 'With love, from @" + user + "'* :cookie:");
+						} else {
+							API.chatLog(":x: User not found! :x:");
+						}
+					} else {
+						API.chatLog(":cookie: *hands you a cookie :cookie:");
+					}
+				} else {
+					switch(cmd) {
+					case "help":
+						API.chatLog(IWoot.iWoot + " User Commands:");
+						API.chatLog("/help");
+						API.chatLog("/cookie @{User}");
+						API.chatLog("/dj");
+						API.chatLog("/song");
+						break;
+					case "dj":
+						API.chatLog("Current DJ: @" + API.getDJ() + "!");
+						break;
+					case "song":
+						API.chatLog("Current Song: " + API.getMedia() + "!");
+						break;
+					default:
+						API.chatLog("Command: " + cmd + ", was not found!");
+						break;
+					}
+				}
+			}
+		}
+	}
+	
 	function userJoinMsg(data) {
 		if(IWoot.isUserJoinLeave) {
 			API.chatLog("@" + data.user.username + " has joined the room");
@@ -267,6 +312,7 @@ if(!isIWootRunning) {
 	function connectAPI() {
 		API.on(API.CHAT, checkForEmotes);
 		API.on(API.ADVANCE, autoDubUp);
+		API.on(API.CHAT, commandHandler);
 		API.on(API.USER_JOIN, userJoinMsg);
 		API.on(API.USER_LEAVE, userLeaveMsg);
 	
