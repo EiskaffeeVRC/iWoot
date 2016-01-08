@@ -212,7 +212,7 @@ if(!isIWootRunning) {
 			}
 		});
 		$("#iwoot-togglevideo").click(function() {
-			var videoHidden = $(".hideVideo-el.show.active").length != 0 ? true : false;
+			var videoHidden = Dubtrack.room.player.istoggleVideo;
 			if(!videoHidden) {
 				$(".hideVideo-el").click();
 				$("#iwoot-togglevideo").css("color", Color.GREEN);
@@ -249,50 +249,6 @@ if(!isIWootRunning) {
 			Dubtrack.room.chat._messagesEl[0].innerHTML = tempString.replaceAll(":fangirling:", '<img class="emoji" src="https://i.imgur.com/L5eZObb.gif"></img>');
 		}
 	}
-	
-	function commandHandler(data) {
-		var msg = data.message;
-		var user = data.user.username;
-		var userId = data.user._id;
-		
-		if(user == Dubtrack.session.get("username")) {
-			if(msg.substring(0, 1) == "/") {
-				var cmd = msg.substring(1);
-				if(cmd.startsWith("cookie")) {
-					var UN = cmd.substring(8);
-					if(UN != "") {
-						if(IWoot.Tools.lookForUser(UN)) {
-							API.sendChat(":cookie: *hands @" + UN + " a cookie, a note on it reads 'With love, from @" + user + "'* :cookie:");
-						} else {
-							API.chatLog(":x: User not found! :x:");
-						}
-					} else {
-						API.chatLog(":cookie: *hands you a cookie :cookie:");
-					}
-				} else {
-					switch(cmd) {
-					case "help":
-						API.chatLog(IWoot.iWoot + " User Commands:");
-						API.chatLog("/help");
-						API.chatLog("/cookie @{User}");
-						API.chatLog("/dj");
-						API.chatLog("/song");
-						break;
-					case "dj":
-						API.chatLog("Current DJ: @" + API.getDJ() + "!");
-						break;
-					case "song":
-						API.chatLog("Current Song: " + API.getMedia() + "!");
-						break;
-					default:
-						API.chatLog("Command: " + cmd + ", was not found!");
-						break;
-					}
-				}
-			}
-		}
-	}
-	
 	function userJoinMsg(data) {
 		if(IWoot.isUserJoinLeave) {
 			API.chatLog("@" + data.user.username + " has joined the room");
@@ -310,9 +266,8 @@ if(!isIWootRunning) {
 	}
 	// Might as well do something productive with the API
 	function connectAPI() {
-		API.on(API.CHAT, checkForEmotes);
 		API.on(API.ADVANCE, autoDubUp);
-		API.on(API.CHAT, commandHandler);
+		API.on(API.CHAT, checkForEmotes);
 		API.on(API.USER_JOIN, userJoinMsg);
 		API.on(API.USER_LEAVE, userLeaveMsg);
 	
