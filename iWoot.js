@@ -58,12 +58,12 @@ if(!isIWootRunning) {
 				user: {
 					_force_updated: null,
 					userInfo: {
-						_id: "565aa52e6fe207830052f580",
+						_id: "564a52ec1b16b62d0069829c",
 						userid: "564a52ec1b16b62d0069829c",
 						__v: 0
 					},
 					_id: "564a52ec1b16b62d0069829c",
-					username: "not_mikehunt",
+					username: "SueSakamotoBot",
 					status: 1,
 					roleid: 1,
 					dubs: 0,
