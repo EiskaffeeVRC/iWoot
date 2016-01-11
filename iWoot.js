@@ -59,11 +59,11 @@ if(!isIWootRunning) {
 					_force_updated: null,
 					userInfo: {
 						_id: "565aa52e6fe207830052f580",
-						userid: "565aa52e6fe207830052f57f",
+						userid: "564a52ec1b16b62d0069829c",
 						__v: 0
 					},
-					_id: "565aa52e6fe207830052f57f",
-					username: "iWoot Chatlog Bot",
+					_id: "564a52ec1b16b62d0069829c",
+					username: "Sue Sakamoto",
 					status: 1,
 					roleid: 1,
 					dubs: 0,
